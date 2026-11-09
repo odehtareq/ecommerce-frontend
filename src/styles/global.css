@@ -99,3 +99,15 @@ button, input, select, textarea { font: inherit; }
   box-shadow: var(--shadow-sm);
   padding: var(--space-4);
 }
+
+/* ===== Layout ===== */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding-block: var(--space-5);
+}
