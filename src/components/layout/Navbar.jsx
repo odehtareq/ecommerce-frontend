@@ -1,19 +1,33 @@
+import { useState } from 'react'
 import { Link, NavLink } from 'react-router'
 import './Navbar.css'
 
 function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const closeMenu = () => setIsMenuOpen(false);
+
   return (
     <header className="navbar">
       <nav className="container navbar__inner">
-        <Link to="/" className="navbar__logo">
+        <Link to="/" className="navbar__logo" onClick={closeMenu}>
           Tech<span>Store</span>
         </Link>
 
-        <ul className="navbar__links">
-          <li><NavLink to="/">Home</NavLink></li>
-          <li><NavLink to="/products">Products</NavLink></li>
-          <li><NavLink to="/cart">Cart</NavLink></li>
-          <li><NavLink to="/login">Login</NavLink></li>
+        <button
+          className="navbar__toggle"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={isMenuOpen}
+        >
+          {isMenuOpen ? '✕' : '☰'}
+        </button>
+
+        <ul className={`navbar__links ${isMenuOpen ? 'navbar__links--open' : ''}`}>
+          <li><NavLink to="/" onClick={closeMenu}>Home</NavLink></li>
+          <li><NavLink to="/products" onClick={closeMenu}>Products</NavLink></li>
+          <li><NavLink to="/cart" onClick={closeMenu}>Cart</NavLink></li>
+          <li><NavLink to="/login" onClick={closeMenu}>Login</NavLink></li>
         </ul>
       </nav>
     </header>
