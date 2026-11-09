@@ -132,3 +132,13 @@ button, input, select, textarea { font: inherit; }
   gap: var(--space-5);
   margin-top: var(--space-5);
 }
+
+/* Hidden visually but readable by screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
