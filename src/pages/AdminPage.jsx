@@ -9,6 +9,8 @@ import StatCard from "../components/admin/StatCard";
 import "../styles/AdminPage.css";
 import AdminProducts from "../components/admin/AdminProducts";
 import { useToast } from "../hooks/useToast";
+import AdminCategories from "../components/admin/AdminCategories";
+import AdminOrders from "../components/admin/AdminOrders";
 
 function AdminPage() {
   const [activeSection, setActiveSection] = useState("overview");
@@ -46,8 +48,32 @@ function AdminPage() {
     showToast(`${updated.name} updated`, "success");
   };
 
-  const [categoryList] = useState(initialCategories);
-  const [orderList] = useState(initialOrders);
+  const addCategory = (data) => {
+    const newCategory = {
+      ...data,
+      id: Math.max(...categoryList.map((c) => c.id)) + 1,
+    };
+    setCategoryList([...categoryList, newCategory]);
+    showToast(`Category "${newCategory.name}" added`, "success");
+  };
+
+  const deleteCategory = (id) => {
+    const category = categoryList.find((c) => c.id === id);
+    setCategoryList(categoryList.filter((c) => c.id !== id));
+    showToast(`Category "${category.name}" deleted`, "info");
+  };
+
+  const updateOrderStatus = (orderId, newStatus) => {
+    setOrderList(
+      orderList.map((o) =>
+        o.id === orderId ? { ...o, status: newStatus } : o,
+      ),
+    );
+    showToast(`${orderId} marked as ${newStatus}`, "success");
+  };
+
+  const [categoryList, setCategoryList] = useState(initialCategories);
+  const [orderList, setOrderList] = useState(initialOrders);
 
   // ===== Derived stats =====
   const totalSales = orderList
@@ -85,7 +111,7 @@ function AdminPage() {
 
             <div className="admin-panels">
               <section className="card">
-                <h2>Recent Orders</h2>
+                <h2>Recent Orders (latest 5)</h2>
                 <ul className="simple-list">
                   {recentOrders.map((order) => {
                     const badge = getOrderStatusBadge(order.status);
@@ -123,7 +149,7 @@ function AdminPage() {
         )}
 
         {activeSection === "products" && (
-                    <AdminProducts
+          <AdminProducts
             products={productList}
             categories={categoryList}
             onToggleActive={toggleProductActive}
@@ -132,9 +158,17 @@ function AdminPage() {
           />
         )}
         {activeSection === "categories" && (
-          <h1>Categories ({categoryList.length}) (coming soon)</h1>
+          <AdminCategories
+            categories={categoryList}
+            products={productList}
+            onAdd={addCategory}
+            onDelete={deleteCategory}
+          />
         )}
-        {activeSection === "orders" && <h1>Orders (coming soon)</h1>}
+
+        {activeSection === "orders" && (
+          <AdminOrders orders={orderList} onStatusChange={updateOrderStatus} />
+        )}
       </div>
     </div>
   );
