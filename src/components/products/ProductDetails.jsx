@@ -1,12 +1,28 @@
-import { useState } from 'react'
-import { getStockStatus, formatPrice } from '../../utils/helpers'
-import QuantitySelector from '../cart/QuantitySelector'
+import { useState } from "react";
+import { getStockStatus, formatPrice } from "../../utils/helpers";
+import QuantitySelector from "../cart/QuantitySelector";
+import { useCart } from "../../hooks/useCart";
+import { useToast } from "../../hooks/useToast";
 
 function ProductDetails({ product }) {
   const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
+  const { showToast } = useToast();
 
   const stock = getStockStatus(product.stockQuantity);
   const isOutOfStock = product.stockQuantity === 0;
+
+  const handleAddToCart = () => {
+    const added = addToCart(product, quantity);
+    if (added) {
+      showToast(`${quantity} × ${product.name} added to cart`, "success");
+    } else {
+      showToast(
+        `Not enough stock. Only ${product.stockQuantity} available in total.`,
+        "error",
+      );
+    }
+  };
 
   return (
     <div className="details">
@@ -31,8 +47,15 @@ function ProductDetails({ product }) {
           </div>
         )}
 
-        <button type="button" className="btn btn--primary" disabled={isOutOfStock}>
-          {isOutOfStock ? 'Out of Stock' : `Add to Cart • ${formatPrice(product.price * quantity)}`}
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+        >
+          {isOutOfStock
+            ? "Out of Stock"
+            : `Add to Cart • ${formatPrice(product.price * quantity)}`}
         </button>
       </div>
     </div>

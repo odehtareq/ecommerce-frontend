@@ -1,10 +1,24 @@
 import { Link } from 'react-router'
 import { getStockStatus, formatPrice } from '../../utils/helpers'
+import { useCart } from '../../hooks/useCart'
+import { useToast } from '../../hooks/useToast'
 import './ProductCard.css'
 
 function ProductCard({ product }) {
+  const { addToCart } = useCart();
+  const { showToast } = useToast();
+
   const stock = getStockStatus(product.stockQuantity);
   const isOutOfStock = product.stockQuantity === 0;
+
+  const handleAddToCart = () => {
+    const added = addToCart(product, 1);
+    if (added) {
+      showToast(`${product.name} added to cart`, 'success');
+    } else {
+      showToast(`You already have the max available (${product.stockQuantity}) in your cart`, 'error');
+    }
+  };
 
   return (
     <article className="product-card">
@@ -23,7 +37,12 @@ function ProductCard({ product }) {
 
         <span className={`badge badge--${stock.type}`}>{stock.label}</span>
 
-        <button className="btn btn--primary btn--full" disabled={isOutOfStock}>
+        <button
+          type="button"
+          className="btn btn--primary btn--full"
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+        >
           {isOutOfStock ? 'Unavailable' : 'Add to Cart'}
         </button>
       </div>
