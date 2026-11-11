@@ -6,14 +6,24 @@ import ProductCard from '../components/products/ProductCard'
 import EmptyState from '../components/common/EmptyState'
 import '../styles/ProductsPage.css'
 
+const PAGE_SIZE = 8;
+
 function ProductsPage() {
-  // Search & category live in the URL (so links from home page work)
+  // ===== State in the URL =====
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get('search') || '';
   const category = searchParams.get('category') || 'all';
 
-  // Sort lives in local state
+  // ===== Local state =====
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [stockFilter, setStockFilter] = useState('all');
   const [sortBy, setSortBy] = useState('default');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Every filter change starts again from the first 8 products
+  const resetPaging = () => setVisibleCount(PAGE_SIZE);
 
   const updateParam = (key, value) => {
     const params = new URLSearchParams(searchParams);
@@ -23,7 +33,21 @@ function ProductsPage() {
       params.delete(key);
     }
     setSearchParams(params, { replace: true });
+    resetPaging();
   };
+
+  const clearFilters = () => {
+    setSearchParams({}, { replace: true });
+    setMinPrice('');
+    setMaxPrice('');
+    setStockFilter('all');
+    setSortBy('default');
+    resetPaging();
+  };
+
+  const hasActiveFilters =
+    search || category !== 'all' || minPrice || maxPrice ||
+    stockFilter !== 'all' || sortBy !== 'default';
 
   // ===== 1. Filter =====
   const term = search.trim().toLowerCase();
@@ -31,7 +55,14 @@ function ProductsPage() {
   const filteredProducts = products
     .filter((p) => p.isActive)
     .filter((p) => p.name.toLowerCase().includes(term))
-    .filter((p) => category === 'all' || p.category === category);
+    .filter((p) => category === 'all' || p.category === category)
+    .filter((p) => minPrice === '' || p.price >= Number(minPrice))
+    .filter((p) => maxPrice === '' || p.price <= Number(maxPrice))
+    .filter((p) => {
+      if (stockFilter === 'in') return p.stockQuantity > 0;
+      if (stockFilter === 'out') return p.stockQuantity === 0;
+      return true;
+    });
 
   // ===== 2. Sort (on a copy!) =====
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -44,13 +75,31 @@ function ProductsPage() {
     }
   });
 
+  // ===== 3. Paginate (Load More) =====
+  const visibleProducts = sortedProducts.slice(0, visibleCount);
+  const hasMore = visibleCount < sortedProducts.length;
+
   return (
     <div className="container">
-      <h1>All Products</h1>
+      <div className="products-header">
+        <h1>All Products</h1>
+        <button
+          type="button"
+          className="btn btn--secondary filters-toggle"
+          onClick={() => setShowFilters(!showFilters)}
+          aria-expanded={showFilters}
+          aria-controls="products-filters"
+        >
+          {showFilters ? 'Hide Filters ✕' : 'Filters ☰'}
+        </button>
+      </div>
 
-      {/* ===== Toolbar ===== */}
-      <div className="products-toolbar">
-        <div className="field">
+      {/* ===== Filters ===== */}
+      <div
+        id="products-filters"
+        className={`products-toolbar ${showFilters ? 'products-toolbar--open' : ''}`}
+      >
+        <div className="field field--wide">
           <label htmlFor="search" className="field__label">Search</label>
           <input
             id="search"
@@ -78,6 +127,46 @@ function ProductsPage() {
         </div>
 
         <div className="field">
+          <label htmlFor="min-price" className="field__label">Min Price ($)</label>
+          <input
+            id="min-price"
+            type="number"
+            min="0"
+            className="input"
+            placeholder="0"
+            value={minPrice}
+            onChange={(e) => { setMinPrice(e.target.value); resetPaging(); }}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="max-price" className="field__label">Max Price ($)</label>
+          <input
+            id="max-price"
+            type="number"
+            min="0"
+            className="input"
+            placeholder="Any"
+            value={maxPrice}
+            onChange={(e) => { setMaxPrice(e.target.value); resetPaging(); }}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="stock" className="field__label">Availability</label>
+          <select
+            id="stock"
+            className="input"
+            value={stockFilter}
+            onChange={(e) => { setStockFilter(e.target.value); resetPaging(); }}
+          >
+            <option value="all">All</option>
+            <option value="in">In Stock</option>
+            <option value="out">Out of Stock</option>
+          </select>
+        </div>
+
+        <div className="field">
           <label htmlFor="sort" className="field__label">Sort by</label>
           <select
             id="sort"
@@ -92,26 +181,55 @@ function ProductsPage() {
             <option value="price-desc">Price: High → Low</option>
           </select>
         </div>
+
+        <button
+          type="button"
+          className="btn btn--danger"
+          onClick={clearFilters}
+          disabled={!hasActiveFilters}
+        >
+          Clear Filters
+        </button>
       </div>
 
       {/* ===== Results count ===== */}
-      <p className="products-count" aria-live="polite">
-        Showing {sortedProducts.length} of {products.length} products
-      </p>
+      <div className="products-meta">
+        <p className="products-count" aria-live="polite">
+          Showing {visibleProducts.length} of {sortedProducts.length} results
+        </p>
+      </div>
 
       {/* ===== Results or Empty ===== */}
       {sortedProducts.length > 0 ? (
-        <div className="product-grid">
-          {sortedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="product-grid">
+            {visibleProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {hasMore && (
+            <div className="load-more">
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={() => setVisibleCount(visibleCount + PAGE_SIZE)}
+              >
+                Load More ({sortedProducts.length - visibleCount} remaining)
+              </button>
+            </div>
+          )}
+        </>
       ) : (
         <EmptyState
           icon="🔍"
           title="No products found"
           message="Try a different search term or change the filters."
-        />
+        >
+          <button type="button" className="btn btn--primary" onClick={clearFilters}>
+            Clear Filters
+          </button>
+        </EmptyState>
       )}
     </div>
   );
