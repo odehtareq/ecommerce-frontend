@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { products } from '../data/products'
 import { categories } from '../data/categories'
+import { useSimulatedFetch } from '../hooks/useSimulatedFetch'
 import ProductCard from '../components/products/ProductCard'
+import ProductCardSkeleton from '../components/products/ProductCardSkeleton'
 import EmptyState from '../components/common/EmptyState'
 import '../styles/ProductsPage.css'
 
@@ -14,6 +16,10 @@ function ProductsPage() {
   const search = searchParams.get('search') || '';
   const category = searchParams.get('category') || 'all';
 
+  // Add ?simulateError=true to the URL to test the Error state
+  const shouldFail = searchParams.get('simulateError') === 'true';
+  const { isLoading, isError, retry } = useSimulatedFetch({ shouldFail });
+
   // ===== Local state =====
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -22,7 +28,6 @@ function ProductsPage() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Every filter change starts again from the first 8 products
   const resetPaging = () => setVisibleCount(PAGE_SIZE);
 
   const updateParam = (key, value) => {
@@ -195,12 +200,30 @@ function ProductsPage() {
       {/* ===== Results count ===== */}
       <div className="products-meta">
         <p className="products-count" aria-live="polite">
-          Showing {visibleProducts.length} of {sortedProducts.length} results
+          {isLoading
+            ? 'Loading products...'
+            : `Showing ${visibleProducts.length} of ${sortedProducts.length} results`}
         </p>
       </div>
 
-      {/* ===== Results or Empty ===== */}
-      {sortedProducts.length > 0 ? (
+      {/* ===== Loading / Error / Results / Empty ===== */}
+      {isLoading ? (
+        <div className="product-grid" aria-busy="true" aria-label="Loading products">
+          {Array.from({ length: PAGE_SIZE }, (_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : isError ? (
+        <EmptyState
+          icon="⚠️"
+          title="Something went wrong"
+          message="We couldn't load the products. Please check your connection and try again."
+        >
+          <button type="button" className="btn btn--primary" onClick={retry}>
+            ↻ Try Again
+          </button>
+        </EmptyState>
+      ) : sortedProducts.length > 0 ? (
         <>
           <div className="product-grid">
             {visibleProducts.map((product) => (
