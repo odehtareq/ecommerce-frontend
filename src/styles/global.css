@@ -174,3 +174,5 @@ button, input, select, textarea { font: inherit; }
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--space-4);
 }
+
+.badge--info { background: #e0ecf7; color: var(--primary-color); }

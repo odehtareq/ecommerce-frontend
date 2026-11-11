@@ -17,3 +17,24 @@ export const SHIPPING_COST = 5;
 export function calculateShipping(subtotal) {
   return subtotal >= FREE_SHIPPING_LIMIT ? 0 : SHIPPING_COST;
 }
+
+// Badge style + icon for each order status
+export function getOrderStatusBadge(status) {
+  const map = {
+    pending:    { type: 'low', icon: '⏳' },
+    processing: { type: 'info', icon: '⚙️' },
+    shipped:    { type: 'info', icon: '🚚' },
+    delivered:  { type: 'in',  icon: '✓' },
+    cancelled:  { type: 'out', icon: '✕' },
+  };
+  return map[status] || { type: 'info', icon: '•' };
+}
+
+// "2026-10-02" -> "Oct 2, 2026"
+export function formatDate(dateString) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}

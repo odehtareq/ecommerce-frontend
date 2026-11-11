@@ -93,3 +93,43 @@ export function validateRegister(values) {
 
   return errors;
 }
+
+export function validateProfile(values) {
+  const errors = {};
+
+  if (!values.fullName.trim()) {
+    errors.fullName = 'Full name is required';
+  } else if (values.fullName.trim().length < 3) {
+    errors.fullName = 'Name must be at least 3 characters';
+  }
+
+  if (!values.phone.trim()) {
+    errors.phone = 'Phone number is required';
+  } else if (!PHONE_REGEX.test(values.phone.trim())) {
+    errors.phone = 'Enter a valid Jordanian number (e.g. 0791234567)';
+  }
+
+  return errors;
+}
+
+export function validatePasswordChange(values) {
+  const errors = {};
+
+  if (!values.currentPassword) {
+    errors.currentPassword = 'Current password is required';
+  }
+
+  if (!values.newPassword) {
+    errors.newPassword = 'New password is required';
+  } else if (!STRONG_PASSWORD_REGEX.test(values.newPassword)) {
+    errors.newPassword = 'At least 8 characters, 1 uppercase letter and 1 number';
+  } else if (values.newPassword === values.currentPassword) {
+    errors.newPassword = 'New password must be different from the current one';
+  }
+
+  if (values.confirmNewPassword !== values.newPassword) {
+    errors.confirmNewPassword = 'Passwords do not match';
+  }
+
+  return errors;
+}
