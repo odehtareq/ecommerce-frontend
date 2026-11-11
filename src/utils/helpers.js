@@ -9,3 +9,11 @@ export function getStockStatus(quantity) {
 export function formatPrice(price) {
   return `$${price.toFixed(2)}`;
 }
+
+export const FREE_SHIPPING_LIMIT = 100;
+export const SHIPPING_COST = 5;
+
+// Free shipping for orders >= $100
+export function calculateShipping(subtotal) {
+  return subtotal >= FREE_SHIPPING_LIMIT ? 0 : SHIPPING_COST;
+}

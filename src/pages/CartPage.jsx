@@ -2,14 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { useCart } from '../hooks/useCart'
 import { useToast } from '../hooks/useToast'
-import { formatPrice } from '../utils/helpers'
+import { formatPrice, calculateShipping, FREE_SHIPPING_LIMIT } from '../utils/helpers'
 import CartItem from '../components/cart/CartItem'
 import EmptyState from '../components/common/EmptyState'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import '../styles/CartPage.css'
-
-const FREE_SHIPPING_LIMIT = 100;
-const SHIPPING_COST = 5;
 
 function CartPage() {
   const { cartItems, cartCount, cartTotal, updateQuantity, removeFromCart } = useCart();
@@ -38,8 +35,7 @@ function CartPage() {
     );
   }
 
-  // ===== Derived values =====
-  const shipping = cartTotal >= FREE_SHIPPING_LIMIT ? 0 : SHIPPING_COST;
+  const shipping = calculateShipping(cartTotal);
   const grandTotal = cartTotal + shipping;
 
   return (
