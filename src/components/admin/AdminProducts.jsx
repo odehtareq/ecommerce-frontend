@@ -1,22 +1,41 @@
-import { useState } from 'react'
-import { formatPrice, getStockStatus } from '../../utils/helpers'
-import FormField from '../forms/FormField'
-import ConfirmDialog from '../common/ConfirmDialog'
-import EmptyState from '../common/EmptyState'
+import { useState } from "react";
+import { formatPrice, getStockStatus } from "../../utils/helpers";
+import FormField from "../forms/FormField";
+import ConfirmDialog from "../common/ConfirmDialog";
+import EmptyState from "../common/EmptyState";
+import Modal from "../common/Modal";
+import ProductForm from "./ProductForm";
 
-function AdminProducts({ products, categories, onToggleActive }) {
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('all');
-  const [status, setStatus] = useState('all');
+function AdminProducts({
+  products,
+  categories,
+  onToggleActive,
+  onAdd,
+  onUpdate,
+}) {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [status, setStatus] = useState("all");
   const [productToDisable, setProductToDisable] = useState(null);
+
+  const [formProduct, setFormProduct] = useState(null);
+
+  const handleFormSubmit = (data) => {
+    if (formProduct === "new") {
+      onAdd(data);
+    } else {
+      onUpdate({ ...formProduct, ...data });
+    }
+    setFormProduct(null);
+  };
 
   const term = search.trim().toLowerCase();
   const filteredProducts = products
     .filter((p) => p.name.toLowerCase().includes(term))
-    .filter((p) => category === 'all' || p.category === category)
+    .filter((p) => category === "all" || p.category === category)
     .filter((p) => {
-      if (status === 'active') return p.isActive;
-      if (status === 'disabled') return !p.isActive;
+      if (status === "active") return p.isActive;
+      if (status === "disabled") return !p.isActive;
       return true;
     });
 
@@ -24,7 +43,7 @@ function AdminProducts({ products, categories, onToggleActive }) {
     if (product.isActive) {
       setProductToDisable(product); // ask first before disabling
     } else {
-      onToggleActive(product.id);   // enabling doesn't need confirmation
+      onToggleActive(product.id); // enabling doesn't need confirmation
     }
   };
 
@@ -34,20 +53,27 @@ function AdminProducts({ products, categories, onToggleActive }) {
   };
 
   const categoryOptions = [
-    { value: 'all', label: 'All Categories' },
+    { value: "all", label: "All Categories" },
     ...categories.map((c) => ({ value: c.name, label: c.name })),
   ];
 
   const statusOptions = [
-    { value: 'all', label: 'All Statuses' },
-    { value: 'active', label: 'Active' },
-    { value: 'disabled', label: 'Disabled' },
+    { value: "all", label: "All Statuses" },
+    { value: "active", label: "Active" },
+    { value: "disabled", label: "Disabled" },
   ];
 
   return (
     <>
       <div className="admin-content__header">
         <h1>Products ({filteredProducts.length})</h1>
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={() => setFormProduct("new")}
+        >
+          + Add Product
+        </button>
       </div>
 
       <div className="admin-filters">
@@ -76,7 +102,11 @@ function AdminProducts({ products, categories, onToggleActive }) {
       </div>
 
       {filteredProducts.length === 0 ? (
-        <EmptyState icon="🔍" title="No products found" message="Try changing the search or filters." />
+        <EmptyState
+          icon="🔍"
+          title="No products found"
+          message="Try changing the search or filters."
+        />
       ) : (
         <div className="table-wrapper">
           <table className="admin-table">
@@ -94,7 +124,10 @@ function AdminProducts({ products, categories, onToggleActive }) {
               {filteredProducts.map((product) => {
                 const stock = getStockStatus(product.stockQuantity);
                 return (
-                  <tr key={product.id} className={product.isActive ? '' : 'is-disabled'}>
+                  <tr
+                    key={product.id}
+                    className={product.isActive ? "" : "is-disabled"}
+                  >
                     <td data-label="Product">
                       <span className="admin-table__product">
                         <img src={product.image} alt="" />
@@ -104,21 +137,32 @@ function AdminProducts({ products, categories, onToggleActive }) {
                     <td data-label="Category">{product.category}</td>
                     <td data-label="Price">{formatPrice(product.price)}</td>
                     <td data-label="Stock">
-                      <span className={`badge badge--${stock.type}`}>{product.stockQuantity}</span>
+                      <span className={`badge badge--${stock.type}`}>
+                        {product.stockQuantity}
+                      </span>
                     </td>
                     <td data-label="Status">
-                      <span className={`badge ${product.isActive ? 'badge--in' : 'badge--out'}`}>
-                        {product.isActive ? '● Active' : '○ Disabled'}
+                      <span
+                        className={`badge ${product.isActive ? "badge--in" : "badge--out"}`}
+                      >
+                        {product.isActive ? "● Active" : "○ Disabled"}
                       </span>
                     </td>
                     <td data-label="Actions">
                       <div className="table-actions">
                         <button
                           type="button"
-                          className={`btn btn--sm ${product.isActive ? 'btn--danger' : 'btn--secondary'}`}
+                          className="btn btn--sm btn--secondary"
+                          onClick={() => setFormProduct(product)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn--sm ${product.isActive ? "btn--danger" : "btn--secondary"}`}
                           onClick={() => handleToggle(product)}
                         >
-                          {product.isActive ? 'Disable' : 'Enable'}
+                          {product.isActive ? "Disable" : "Enable"}
                         </button>
                       </div>
                     </td>
@@ -138,6 +182,18 @@ function AdminProducts({ products, categories, onToggleActive }) {
         onConfirm={confirmDisable}
         onCancel={() => setProductToDisable(null)}
       />
+      <Modal
+        isOpen={formProduct !== null}
+        title={formProduct === "new" ? "Add New Product" : "Edit Product"}
+        onClose={() => setFormProduct(null)}
+      >
+        <ProductForm
+          product={formProduct === "new" ? null : formProduct}
+          categories={categories}
+          onSubmit={handleFormSubmit}
+          onCancel={() => setFormProduct(null)}
+        />
+      </Modal>
     </>
   );
 }

@@ -12,12 +12,6 @@
   margin-bottom: var(--space-4);
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-}
-
 .payment-options {
   border: none;
   margin-bottom: var(--space-4);
@@ -93,8 +87,4 @@
 @media (max-width: 900px) {
   .checkout-layout { grid-template-columns: 1fr; }
   .checkout-summary { order: -1; } /* summary first on mobile */
-}
-
-@media (max-width: 640px) {
-  .form-row { grid-template-columns: 1fr; }
 }

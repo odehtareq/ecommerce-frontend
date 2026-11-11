@@ -29,6 +29,23 @@ function AdminPage() {
     );
   };
 
+  const addProduct = (data) => {
+    const newProduct = {
+      ...data,
+      id: Math.max(...productList.map((p) => p.id)) + 1,
+      isActive: true,
+      isFeatured: false,
+      createdAt: new Date().toISOString().slice(0, 10),
+    };
+    setProductList([newProduct, ...productList]);
+    showToast(`${newProduct.name} added`, "success");
+  };
+
+  const updateProduct = (updated) => {
+    setProductList(productList.map((p) => (p.id === updated.id ? updated : p)));
+    showToast(`${updated.name} updated`, "success");
+  };
+
   const [categoryList] = useState(initialCategories);
   const [orderList] = useState(initialOrders);
 
@@ -105,11 +122,13 @@ function AdminPage() {
           </>
         )}
 
-        {activeSection === 'products' && (
-          <AdminProducts
+        {activeSection === "products" && (
+                    <AdminProducts
             products={productList}
             categories={categoryList}
             onToggleActive={toggleProductActive}
+            onAdd={addProduct}
+            onUpdate={updateProduct}
           />
         )}
         {activeSection === "categories" && (

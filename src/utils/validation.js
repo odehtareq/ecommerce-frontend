@@ -133,3 +133,37 @@ export function validatePasswordChange(values) {
 
   return errors;
 }
+
+export function validateProduct(values) {
+  const errors = {};
+
+  if (!values.name.trim()) {
+    errors.name = 'Product name is required';
+  } else if (values.name.trim().length < 3) {
+    errors.name = 'Name must be at least 3 characters';
+  }
+
+  if (!values.category) {
+    errors.category = 'Please select a category';
+  }
+
+  if (values.price === '') {
+    errors.price = 'Price is required';
+  } else if (Number(values.price) <= 0) {
+    errors.price = 'Price must be greater than 0';
+  }
+
+  if (values.stockQuantity === '') {
+    errors.stockQuantity = 'Stock is required';
+  } else if (!Number.isInteger(Number(values.stockQuantity)) || Number(values.stockQuantity) < 0) {
+    errors.stockQuantity = 'Stock must be a whole number (0 or more)';
+  }
+
+  if (!values.image.trim()) {
+    errors.image = 'Image URL is required';
+  } else if (!/^(https?:\/\/|\/)/.test(values.image.trim())) {
+    errors.image = 'Image must be a URL (https://...) or a path (/images/...)';
+  }
+
+  return errors;
+}

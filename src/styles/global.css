@@ -176,3 +176,15 @@ button, input, select, textarea { font: inherit; }
 }
 
 .badge--info { background: #e0ecf7; color: var(--primary-color); }
+
+
+
+@media (max-width: 640px) {
+  .form-row { grid-template-columns: 1fr; }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
