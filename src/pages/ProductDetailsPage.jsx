@@ -1,15 +1,38 @@
 import { Link, useParams } from 'react-router'
 import { products } from '../data/products'
+import { useSimulatedFetch } from '../hooks/useSimulatedFetch'
 import ProductDetails from '../components/products/ProductDetails'
 import ProductCard from '../components/products/ProductCard'
 import EmptyState from '../components/common/EmptyState'
 import '../styles/ProductDetailsPage.css'
+import '../components/products/ProductCardSkeleton.css'
 
 function ProductDetailsPage() {
   const { id } = useParams();
+  const { isLoading } = useSimulatedFetch({ delay: 500 });
+
+  // ===== Loading =====
+  if (isLoading) {
+    return (
+      <div className="container" aria-busy="true" aria-label="Loading product">
+        <div className="details">
+          <div className="skeleton skeleton--image" />
+          <div className="details__info">
+            <div className="skeleton skeleton--text skeleton--short" style={{ width: '30%' }} />
+            <div className="skeleton skeleton--text" style={{ width: '80%', height: 32 }} />
+            <div className="skeleton skeleton--price" />
+            <div className="skeleton skeleton--text" style={{ width: '100%' }} />
+            <div className="skeleton skeleton--text" style={{ width: '90%' }} />
+            <div className="skeleton skeleton--button" style={{ width: '60%' }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const product = products.find((p) => p.id === Number(id) && p.isActive);
 
-  // Product not found (e.g. /products/999)
+  // ===== Not found =====
   if (!product) {
     return (
       <div className="container">
