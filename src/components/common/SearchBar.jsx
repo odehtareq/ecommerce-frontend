@@ -19,7 +19,7 @@ function SearchBar() {
         id="home-search"
         type="search"
         className="input search-bar__input"
-        placeholder="Search for headphones, laptops..."
+        placeholder="Search by product name..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />

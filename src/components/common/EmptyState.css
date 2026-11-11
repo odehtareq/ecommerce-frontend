@@ -1,0 +1,16 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  background: var(--surface-color);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.empty-state__icon { font-size: 3rem; }
+.empty-state__title { font-size: var(--fs-xl); }
+.empty-state__message { color: var(--muted-text-color); max-width: 420px; }
+.empty-state .btn { margin-top: var(--space-2); }

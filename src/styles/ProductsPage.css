@@ -1,0 +1,21 @@
+.products-toolbar {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--space-3);
+  margin-block: var(--space-4);
+}
+
+.products-toolbar .field {
+  margin-bottom: 0;
+}
+
+.products-count {
+  color: var(--muted-text-color);
+  font-size: var(--fs-sm);
+}
+
+@media (max-width: 768px) {
+  .products-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
