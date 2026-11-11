@@ -32,3 +32,21 @@ export function validateCheckout(values) {
 
   return errors;
 }
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function validateLogin(values) {
+  const errors = {};
+
+  if (!values.email.trim()) {
+    errors.email = 'Email is required';
+  } else if (!EMAIL_REGEX.test(values.email.trim())) {
+    errors.email = 'Enter a valid email address';
+  }
+
+  if (!values.password) {
+    errors.password = 'Password is required';
+  }
+
+  return errors;
+}
