@@ -1,4 +1,53 @@
+import { Link, useParams } from 'react-router'
+import { products } from '../data/products'
+import ProductDetails from '../components/products/ProductDetails'
+import ProductCard from '../components/products/ProductCard'
+import EmptyState from '../components/common/EmptyState'
+import '../styles/ProductDetailsPage.css'
+
 function ProductDetailsPage() {
-  return <div className="container"><h1>Product Details</h1></div>;
+  const { id } = useParams();
+  const product = products.find((p) => p.id === Number(id) && p.isActive);
+
+  // Product not found (e.g. /products/999)
+  if (!product) {
+    return (
+      <div className="container">
+        <EmptyState
+          icon="❓"
+          title="Product not found"
+          message="The product you are looking for doesn't exist or was removed."
+        >
+          <Link to="/products" className="btn btn--primary">Back to Products</Link>
+        </EmptyState>
+      </div>
+    );
+  }
+
+  const similarProducts = products
+    .filter((p) => p.isActive && p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
+
+  return (
+    <div className="container">
+      <Link to="/products" className="back-link">← Back to Products</Link>
+
+      <ProductDetails key={product.id} product={product} />
+
+      {similarProducts.length > 0 && (
+        <section className="section">
+          <div className="section__header">
+            <h2 className="section__title">Similar Products</h2>
+          </div>
+          <div className="product-grid">
+            {similarProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
 }
+
 export default ProductDetailsPage;
