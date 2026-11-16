@@ -6,7 +6,7 @@ The project includes a customer storefront (browse, search, filter, cart, checko
 
 > ⚠️ **This project uses Mock Data only.** All products, users and orders come from local files in `src/data/`. It is **not** connected to the REST API or the Neon database yet — this will be done in the next task.
 
-🔗 **Live Preview:** [YOUR-VERCEL-LINK-HERE](YOUR-VERCEL-LINK-HERE)
+🔗 **Live Preview:** https://ecommerce-frontend-six-livid.vercel.app/
 
 ---
 
